@@ -475,7 +475,7 @@ placeholder="Cari transaksi coffee...">
 
 <button class="btn btn-search px-4">
 
-Search
+Cari
 
 </button>
 

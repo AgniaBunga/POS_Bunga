@@ -445,256 +445,139 @@ body{
 
 <div class="container">
 
+    <div class="text-center mb-5">
 
-<div class="text-center mb-5">
+        <h1 class="user-title">
+            ☕ Coffee Bloom Pengguna
+        </h1>
 
+        <p class="user-subtitle">
+            Manage account and customer access
+        </p>
 
-<h1 class="user-title">
+    </div>
 
-☕ Coffee Bloom Users
+    <div class="mb-4">
 
-</h1>
+        <a href="{{ route('admin.users.create') }}"
+           class="btn btn-create">
 
+            ☕ Tambah Pengguna
 
-<p class="user-subtitle">
+        </a>
 
-Manage account and customer access
+    </div>
 
-</p>
+    <div class="search-box mb-4">
 
+        <form action="{{ route('admin.users') }}" method="GET">
+
+            <div class="input-group">
+
+                <input
+                    type="text"
+                    name="search"
+                    value="{{ request('search') }}"
+                    class="form-control"
+                    placeholder="Search username or email...">
+
+                <button type="submit" class="btn btn-search">
+                    Cari
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+    <div class="table-box">
+
+        <table class="table">
+
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Nama</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @foreach ($users as $user)
+
+                <tr>
+
+                    <td>
+                        <span>
+                            {{ $users->firstItem() + $loop->index }}
+                        </span>
+                    </td>
+
+                    <td>
+                        <div class="name-box">
+                            {{ $user->name }}
+                        </div>
+                    </td>
+
+                    <td>
+                        <div class="email-box">
+                            {{ $user->email }}
+                        </div>
+                    </td>
+
+                    <td>
+                        <span class="role">
+                            {{ $user->role->name }}
+                        </span>
+                    </td>
+
+                    <td>
+
+                        <div class="action-box">
+
+                            <a href="{{ route('admin.users.edit', $user) }}"
+                               class="btn btn-edit">
+                                Edit
+                            </a>
+
+                            <form
+                                action="{{ route('admin.users.destroy', $user) }}"
+                                method="POST"
+                                class="d-inline">
+
+                                @csrf
+                                @method('DELETE')
+
+                                <button
+                                    class="btn btn-delete"
+                                    onclick="return confirm('Yakin hapus user ini?')">
+                                    Hapus
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                @endforeach
+
+            </tbody>
+
+        </table>
+
+        <div class="mt-4">
+            {{ $users->links() }}
+        </div>
+
+    </div>
 
 </div>
-
-
-
-
-
-<div class="mb-4">
-
-<a href="{{ route('admin.users.create') }}" 
-class="btn btn-create">
-
-☕ Tambah User
-
-</a>
-
-</div>
-
-
-
-
-
-
-<div class="search-box mb-4">
-
-
-<form action="{{ route('admin.index') }}" method="GET">
-
-
-<div class="input-group">
-
-
-<input
-
-type="text"
-
-name="search"
-
-value="{{ request('search') }}"
-
-class="form-control"
-
-placeholder="Search username or email...">
-
-
-
-<button class="btn btn-search">
-
-Search
-
-</button>
-
-
-</div>
-
-
-</form>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="table-box">
-
-
-<table class="table">
-
-
-<thead>
-
-<tr>
-
-<th>No</th>
-
-<th>Nama</th>
-
-<th>Email</th>
-
-<th>Role</th>
-
-<th>Aksi</th>
-
-</tr>
-
-</thead>
-
-
-
-<tbody>
-
-
-@foreach ($users as $user)
-
-
-<tr>
-
-
-<td>
-
-<span>
-
-{{ $users->firstItem() + $loop->index }}
-
-</span>
-
-</td>
-
-
-
-<td>
-
-<div class="name-box">
-
-{{ $user->name }}
-
-</div>
-
-</td>
-
-
-
-
-<td>
-
-<div class="email-box">
-
-{{ $user->email }}
-
-</div>
-
-</td>
-
-
-
-
-<td>
-
-<span class="role">
-
-{{ $user->role->name }}
-
-</span>
-
-</td>
-
-
-
-
-<td>
-
-
-<div class="action-box">
-
-
-<a href="{{ route('admin.users.edit',$user) }}"
-
-class="btn btn-edit">
-
-
-Edit
-
-</a>
-
-
-
-
-
-<form 
-
-action="{{ route('admin.users.destroy',$user) }}"
-
-method="POST"
-
-class="d-inline">
-
-
-@csrf
-
-@method('DELETE')
-
-
-
-<button
-
-class="btn btn-delete"
-
-onclick="return confirm('Yakin hapus user ini?')">
-
-Hapus
-
-</button>
-
-
-</form>
-
-
-</div>
-
-
-</td>
-
-
-</tr>
-
-
-@endforeach
-
-
-</tbody>
-
-
-</table>
-
-
-
-
-<div class="mt-4">
-
-{{ $users->links() }}
-
-</div>
-
-
-</div>
-
-
-
-</div>
-
 
 @endsection

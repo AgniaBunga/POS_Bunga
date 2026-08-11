@@ -251,7 +251,7 @@ label{
 
 
         <h3>
-            ☕ Tambah User
+            ☕ Tambah Pengguna
         </h3>
 
 
@@ -325,7 +325,7 @@ label{
                     type="submit" 
                     class="btn btn-save">
 
-                    ☕ Simpan User
+                    ☕ Simpan Pengguna
 
                 </button>
 
