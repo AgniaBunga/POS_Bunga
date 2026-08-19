@@ -10,8 +10,13 @@ use App\Http\Controllers\UserController;
 
 // route yang bisa diakses ketika user belum login
 Route::middleware('guest')->group(function () {
-    Route::get('/login', [AuthController::class, 'index'])->name('login');
-    Route::post('/auth', [AuthController::class, 'auth'])->name('auth');
+
+    Route::get('/login', [AuthController::class, 'index'])
+        ->name('login');
+
+    Route::post('/auth', [AuthController::class, 'auth'])
+        ->name('auth');
+
 });
 
 
@@ -23,6 +28,10 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout'])
         ->name('logout');
+
+    // Halaman Tentang Saya
+    Route::view('/tentang', 'tentang')
+        ->name('tentang');
 
 
     // route khusus admin
@@ -54,6 +63,7 @@ Route::middleware('auth')->group(function () {
 
             Route::delete('/users/destroy/{user}', [UserController::class, 'destroy'])
                 ->name('users.destroy');
+
         });
 
 

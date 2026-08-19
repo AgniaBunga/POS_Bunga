@@ -98,16 +98,23 @@
                 @endif
 
                 <li class="nav-item">
-                    <a class="nav-link {{ Request::is('produk') ? 'active' : '' }}"
+                    <a class="nav-link {{ Request::is('produk') || Request::is('produk/*') ? 'active' : '' }}"
                        href="{{ route('produk.index') }}">
                         Produk
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link {{ Request::is('penjualan') ? 'active' : '' }}"
+                    <a class="nav-link {{ Request::is('penjualan') || Request::is('penjualan/*') ? 'active' : '' }}"
                        href="{{ route('penjualan.index') }}">
                         Penjualan
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {{ Request::is('tentang') ? 'active' : '' }}"
+                       href="{{ route('tentang') }}">
+                        Tentang Saya
                     </a>
                 </li>
 
