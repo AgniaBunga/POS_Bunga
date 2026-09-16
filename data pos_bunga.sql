@@ -218,13 +218,13 @@ CREATE TABLE IF NOT EXISTS `produk` (
 INSERT INTO `produk` (`id`, `user_id`, `foto`, `nama`, `harga_beli`, `harga_jual`, `stok`, `created_at`, `updated_at`) VALUES
 	(1, 3, 'products/KOJF52DHxWgJgrRhZjZZQfv1KA6HfkpfkX7OvfrA.jpg', 'Tiramisu Latte', 20000, 25500, 229, '2026-07-30 20:56:08', '2026-08-09 20:59:46'),
 	(2, 3, 'products/WaNuNbJ9S0uKD4VURSfXhLQi69pbgFrZGmTW2iGJ.jpg', 'Matcha Latte', 21000, 23400, 321, '2026-07-30 20:57:12', '2026-07-30 20:57:12'),
-	(3, 2, 'products/onOapMu4l6O6Nogmc9aHM9LcwjAFYZQAgOA0Zqls.jpg', 'Strawberry Milk', 31000, 31000, 868, '2026-07-30 20:57:47', '2026-08-18 19:47:59'),
+	(3, 2, 'products/qEOnz55AfpOu8Y4dug8BBogLIqk3dvs1dgnuetHW.jpg', 'Strawberry Milk', 31000, 31000, 868, '2026-07-30 20:57:47', '2026-09-08 18:42:14'),
 	(4, 3, 'products/iOWrOUwwy1HOooh9zDBJ7I3bfbZokpysjjjRu7aT.jpg', 'Caramel Macchiato', 16500, 21100, 230, '2026-07-30 20:58:30', '2026-09-03 19:48:21'),
 	(5, 3, 'products/aXAN2MhQzCE0oZ46t9cnE64giGWHtntKtkHrmwTm.jpg', 'Mocca Coffe', 26000, 31000, 353, '2026-07-30 20:59:13', '2026-08-11 23:39:42'),
 	(6, 3, 'products/35Kr6mP7l23wqUX3yoRczbftmsl54fDdegXGyXgu.jpg', 'Vanilla Frappuccino', 22000, 24000, 264, '2026-07-30 20:59:55', '2026-07-31 00:04:33'),
-	(7, 3, 'products/nKL59hDgEaeI3ah2gQVQfXBTqTpAAipdMKkn3gnt.jpg', 'Iced Ammericano', 17000, 19900, 330, '2026-07-30 21:01:07', '2026-08-04 00:11:13'),
+	(7, 2, 'products/a1NaHhxhYCF0vAJw1lugZhHwi9bSJgsXKRryqtuS.jpg', 'Iced Ammericano', 17000, 17000, 330, '2026-07-30 21:01:07', '2026-09-08 18:43:50'),
 	(8, 3, 'products/6ZpKAOcLLayHSYGNcQ9Idrr5in6n30wQ9x1rkwHV.jpg', 'Chocolatte Hazelnut', 26000, 28000, 761, '2026-07-30 21:01:52', '2026-08-11 23:39:28'),
-	(9, 3, 'products/NYhs8Ov16yvgJvGqTowSgMUC5sxv4MUgKziGOm4d.jpg', 'Espresso Classic', 21100, 24400, 986, '2026-07-30 21:02:29', '2026-07-30 21:03:16'),
+	(9, 2, 'products/fEtHHgljkBaKdnFpkV2T66u7ywLVX5QdpEpo7kK2.jpg', 'Espresso Classic', 21100, 21100, 986, '2026-07-30 21:02:29', '2026-09-08 18:48:30'),
 	(11, 3, 'products/LwMHBP1Nf6iqKru10NYpxwAsjjEhHRLkxhLZG8xz.jpg', 'Cappuccino', 0, 26000, 836, '2026-07-30 23:56:33', '2026-09-03 19:48:19'),
 	(12, 3, 'products/bODUjcecRI8FNVl38hXaOfKWuAGiHEimINTvpPOS.jpg', 'Red Velvet Latte', 0, 19800, 987, '2026-07-31 00:01:17', '2026-08-11 23:31:21'),
 	(13, 2, 'products/otHspRnzpUNTa9XfVgiiddY6Lv2UNKD7yNdHjfKh.jpg', 'Lychee Tea', 23000, 23000, 562, '2026-07-31 00:02:17', '2026-08-18 19:48:24');
@@ -256,11 +256,9 @@ CREATE TABLE IF NOT EXISTS `sessions` (
   KEY `sessions_last_activity_index` (`last_activity`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table pos_bunga.sessions: ~2 rows (approximately)
+-- Dumping data for table pos_bunga.sessions: ~3 rows (approximately)
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-	('PL4rwnQrqLJKuObHJXlA3QzKCwRLsy9ZAjclyOwe', 3, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiaFFwVW9xWW5xTUdjY0VROFFZMTZmTlI4MWk5WkQ2dXRocnpVTHd3dCI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6MzU6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9wcm9kdWs/cGFnZT0yIjtzOjU6InJvdXRlIjtzOjEyOiJwcm9kdWsuaW5kZXgiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aTozO30=', 1788490358),
-	('ZKGBxD0djLpC6kVhMkrWzg71JHLuVLU4lCxf3gwh', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoiTFhhaGRLWVRDaFhpeTVNVHZUYlRQcEM5QVkyTHFTcTdLTlNzeTgwQyI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJuZXciO2E6MDp7fXM6Mzoib2xkIjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6Mjc6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9sb2dpbiI7czo1OiJyb3V0ZSI7czo1OiJsb2dpbiI7fX0=', 1788489078),
-	('ZNGuIXCy1h1hM6LncIefRL5PhsyoV5MZv2kGDTWB', 2, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiZVcxaGd5dUVGQUViZkdkT3RGUzRCM3BUYWpvcEpjellKZVhidG8zVCI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6MzU6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9wcm9kdWs/cGFnZT0xIjtzOjU6InJvdXRlIjtzOjEyOiJwcm9kdWsuaW5kZXgiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToyO30=', 1788331523);
+	('kBSA3vG5x39fPxHPM8jlkQCO9JnBHIRKVQHHwezO', 2, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiMWkzZWRVSnpSbUlkM201djN5eHZVTHNwVkdWSlRhV0c5UnAzUUM5USI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6Mjg6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9wcm9kdWsiO3M6NToicm91dGUiO3M6MTI6InByb2R1ay5pbmRleCI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjI7fQ==', 1788918516);
 
 -- Dumping structure for table pos_bunga.users
 CREATE TABLE IF NOT EXISTS `users` (
