@@ -51,7 +51,7 @@ body {
 }
 
 /* SEARCH */
-.form-control {
+.form-control, .form-select {
     border-radius:20px;
     border:2px solid #f1ddd7;
     padding:12px;
@@ -124,7 +124,7 @@ body {
     border:none;
 }
 
-/* TOTAL */
+/* TOTAL & DISKON BOX */
 .total-box {
     background:
     linear-gradient(
@@ -134,12 +134,23 @@ body {
     );
     border-radius:25px;
     padding:20px;
-    text-align:center;
+}
+
+.subtotal-text {
+    color:#7a4f44;
+    font-weight:600;
+    font-size:14px;
+}
+
+.discount-text {
+    color:#dc3545;
+    font-weight:700;
+    font-size:14px;
 }
 
 .total-price {
     color:#c06b5d;
-    font-size:28px;
+    font-size:30px;
     font-weight:800;
 }
 
@@ -161,12 +172,43 @@ body {
 .btn-cancel {
     border-radius:20px;
 }
+
+/* POPUP CUSTOM (TANPA BOOTSTRAP JS) */
+.custom-alert-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+}
+
+.custom-alert-box {
+    background: #fff0eb;
+    border: 3px solid #dc3545;
+    border-radius: 25px;
+    padding: 35px;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    animation: popupAnim 0.3s ease-out;
+}
+
+@keyframes popupAnim {
+    from { transform: scale(0.7); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
 </style>
 
-{{-- PENANGANAN ERROR DAN ALERT DENGAN PENGECEKAN TIPE DATA --}}
+{{-- ALERT SERVER-SIDE --}}
 @if (isset($errors) && is_object($errors) && method_exists($errors, 'any') && $errors->any())
-<div class="alert alert-danger rounded-4">
-    <strong>⚠️ Terjadi Kesalahan:</strong>
+<div class="alert alert-danger rounded-4 p-3 shadow-sm mb-4">
+    <h4 class="fw-bold mb-1">⚠️ Terjadi Kesalahan!</h4>
     <ul class="mb-0">
         @foreach ($errors->all() as $error)
         <li>{{ $error }}</li>
@@ -174,19 +216,20 @@ body {
     </ul>
 </div>
 @elseif (session('error_message'))
-<div class="alert alert-danger rounded-4">
-    <strong>⚠️ Terjadi Kesalahan:</strong> {{ session('error_message') }}
+<div class="alert alert-danger rounded-4 p-3 shadow-sm mb-4">
+    <h4 class="fw-bold mb-1">⚠️ Terjadi Kesalahan!</h4>
+    <div>{{ session('error_message') }}</div>
 </div>
 @endif
 
 @if(session('success'))
-<div class="alert alert-success rounded-4">
+<div class="alert alert-success rounded-4 p-3 shadow-sm mb-4">
     ☕ {{ session('success') }}
 </div>
 @endif
 
 @if($sale->status === 'COMPLETED')
-<div class="alert alert-success rounded-4">
+<div class="alert alert-success rounded-4 p-3 shadow-sm mb-4">
     ☕ Transaksi sudah selesai dan tidak dapat diubah.
 </div>
 @endif
@@ -209,14 +252,13 @@ body {
                 </form>
 
                 @foreach($products as $product)
-                <form method="POST" action="{{ route('itempenjualan.store') }}" class="row mb-3 align-items-center">
+                <form method="POST" action="{{ route('itempenjualan.store') }}" class="row mb-3 align-items-center form-add-item" data-stok="{{ $product->stok }}" data-nama="{{ $product->nama }}">
                     @csrf
                     <input type="hidden" name="product_id" value="{{ $product->id }}">
 
                     <div class="col-7">
                         <button class="btn product-item w-100 text-start" type="submit">
                             <div class="d-flex align-items-center gap-3">
-                                {{-- FOTO PRODUK + FALLBACK --}}
                                 <img src="{{ asset('storage/'.$product->foto) }}" 
                                      onerror="this.onerror=null;this.src='https://via.placeholder.com/60?text=Coffee';" 
                                      class="product-img" 
@@ -224,13 +266,14 @@ body {
                                 <div>
                                     <div class="fw-bold">{{ $product->nama }}</div>
                                     <small class="price-text">Rp {{ number_format($product->harga_jual,0,',','.') }}</small>
+                                    <small class="d-block text-muted" style="font-size: 11px;">Stok: {{ $product->stok }}</small>
                                 </div>
                             </div>
                         </button>
                     </div>
 
                     <div class="col-3">
-                        <input type="number" name="quantity" value="1" min="1" class="form-control">
+                        <input type="number" name="quantity" value="1" min="1" class="form-control input-qty">
                     </div>
 
                     <div class="col-2">
@@ -253,19 +296,24 @@ body {
                         <tr>
                             <th>Menu</th>
                             <th>Qty</th>
-                            <th>Total</th>
+                            <th>Subtotal</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
+                        @php $subtotalItem = 0; @endphp
                         @forelse($sale->itemPenjualan as $item)
+                        @php $subtotalItem += $item->subtotal; @endphp
                         <tr>
-                            <td><strong>☕ {{ $item->produk->nama }}</strong></td>
                             <td>
-                                <form method="POST" action="{{ route('itempenjualan.update',$item->id) }}">
+                                <strong>☕ {{ $item->produk->nama }}</strong>
+                                <small class="d-block text-muted" style="font-size: 11px;">Sisa stok: {{ $item->produk->stok }}</small>
+                            </td>
+                            <td>
+                                <form method="POST" action="{{ route('itempenjualan.update',$item->id) }}" class="form-update-item" data-stok="{{ $item->produk->stok }}" data-nama="{{ $item->produk->nama }}">
                                     @csrf
                                     @method('PUT')
-                                    <input type="number" name="quantity" value="{{ $item->kuantitas }}" class="form-control form-control-sm" onchange="this.form.submit()">
+                                    <input type="number" name="quantity" value="{{ $item->kuantitas }}" min="1" class="form-control form-control-sm input-qty-cart">
                                 </form>
                             </td>
                             <td>Rp {{ number_format($item->subtotal,0,',','.') }}</td>
@@ -288,15 +336,41 @@ body {
                 </table>
             </div>
 
-            <div class="card-footer bg-white">
-                <div class="total-box mb-3">
-                    <small>Total Pembayaran</small>
-                    <div class="total-price">Rp {{ number_format($sale->total_pembayaran,0,',','.') }}</div>
-                </div>
+            <div class="card-footer bg-white p-4">
 
                 <form method="POST" action="{{ route('penjualan.update',$sale->id) }}" onsubmit="return confirm('Yakin ingin checkout?')">
                     @csrf
                     @method('PUT')
+
+                    {{-- INPUT DISKON PENJUALAN --}}
+                    <div class="mb-3">
+                        <label class="fw-bold mb-1" style="color: #7a4f44;">🏷️ Diskon Penjualan (%)</label>
+                        <input type="number" 
+                               name="diskon" 
+                               id="diskon_input" 
+                               class="form-control" 
+                               placeholder="Masukkan diskon (misal: 10)" 
+                               value="{{ old('diskon', $sale->diskon ?? 0) }}" 
+                               min="0" 
+                               max="100">
+                    </div>
+
+                    {{-- RINGKASAN PEMBAYARAN --}}
+                    <div class="total-box mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="subtotal-text">Subtotal Item:</span>
+                            <span class="fw-bold" id="text-subtotal">Rp {{ number_format($subtotalItem,0,',','.') }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="discount-text">Potongan Diskon:</span>
+                            <span class="discount-text" id="text-potongan">- Rp 0</span>
+                        </div>
+                        <hr style="border-top: 2px dashed #c79288; opacity: 0.5;">
+                        <div class="text-center">
+                            <small class="text-muted fw-bold">TOTAL AKHIR PEMBAYARAN</small>
+                            <div class="total-price" id="text-total-akhir">Rp {{ number_format($subtotalItem,0,',','.') }}</div>
+                        </div>
+                    </div>
 
                     <select name="payment_method" id="payment_method" class="form-select mb-3" required>
                         <option value="">Pilih Pembayaran</option>
@@ -306,7 +380,6 @@ body {
 
                     <!-- AREA DISPLAY QRIS -->
                     <div id="qris-area" style="display:none;" class="text-center mb-3">
-                        {{-- GAMBAR QRIS + FALLBACK DUMMY QR --}}
                         <img src="{{ asset('qr/qris.jpg') }}" 
                              onerror="this.onerror=null;this.src='https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=COFFEE_BLOOM_QRIS';" 
                              class="img-fluid rounded-4 shadow" 
@@ -341,10 +414,27 @@ body {
 
 </div>
 
+<!-- POPUP CUSTOM WARNING STOK -->
+<div id="customAlertOverlay" class="custom-alert-overlay">
+    <div class="custom-alert-box">
+        <div style="font-size: 70px;">⚠️</div>
+        <h1 style="color: #dc3545; font-weight: 800; font-size: 30px; margin-bottom: 15px;">STOK TIDAK CUKUP!</h1>
+        <p id="alertMsgMenu" style="font-size: 18px; color: #333; margin-bottom: 10px;"></p>
+        <div id="alertMsgDetail" style="background: #dc3545; color: white; padding: 10px 15px; border-radius: 12px; font-weight: bold; font-size: 16px; margin-bottom: 20px; display: inline-block;"></div>
+        <div>
+            <button id="btnCloseAlert" style="background: #dc3545; color: white; border: none; padding: 12px 35px; border-radius: 20px; font-weight: bold; font-size: 16px; cursor: pointer;">Tutup / Mengerti</button>
+        </div>
+    </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function(){
 
-    let total = {{ $sale->total_pembayaran }};
+    const rawSubtotal = {{ $subtotalItem }};
+    
+    const diskonInput = document.getElementById('diskon_input');
+    const textPotongan = document.getElementById('text-potongan');
+    const textTotalAkhir = document.getElementById('text-total-akhir');
 
     const metode = document.getElementById('payment_method');
     const cashArea = document.getElementById('cash-area');
@@ -352,12 +442,89 @@ document.addEventListener('DOMContentLoaded', function(){
     const bayar = document.getElementById('uang_bayar');
     const kembali = document.getElementById('kembalian');
 
-    // Sembunyikan semua elemen saat halaman pertama kali dibuka
+    let currentTotalAkhir = rawSubtotal;
+
+    // FUNGSI HITUNG TOTAL AKHIR & KEMBALIAN SECARA REALTIME
+    function hitungTotal() {
+        let persenDiskon = parseFloat(diskonInput.value) || 0;
+        if (persenDiskon > 100) persenDiskon = 100;
+        if (persenDiskon < 0) persenDiskon = 0;
+
+        let nominalPotongan = rawSubtotal * (persenDiskon / 100);
+        currentTotalAkhir = rawSubtotal - nominalPotongan;
+
+        textPotongan.innerText = '- Rp ' + nominalPotongan.toLocaleString('id-ID');
+        textTotalAkhir.innerText = 'Rp ' + currentTotalAkhir.toLocaleString('id-ID');
+
+        hitungKembalian();
+    }
+
+    function hitungKembalian() {
+        if(metode.value === 'CASH') {
+            let uang = parseInt(bayar.value) || 0;
+            let hasil = uang - currentTotalAkhir;
+
+            kembali.value = hasil >= 0
+                ? 'Rp ' + hasil.toLocaleString('id-ID')
+                : 'Uang Kurang';
+        }
+    }
+
+    diskonInput.addEventListener('input', hitungTotal);
+    bayar.addEventListener('input', hitungKembalian);
+
+    // ELEMENT CUSTOM ALERT
+    const overlay = document.getElementById('customAlertOverlay');
+    const msgMenu = document.getElementById('alertMsgMenu');
+    const msgDetail = document.getElementById('alertMsgDetail');
+    const btnClose = document.getElementById('btnCloseAlert');
+
+    function tampilkanWarning(namaMenu, stok, qty) {
+        msgMenu.innerText = 'Permintaan untuk "' + namaMenu + '" melebihi batas stok!';
+        msgDetail.innerText = 'Stok Tersedia: ' + stok + ' | Dipesan: ' + qty;
+        overlay.style.display = 'flex';
+    }
+
+    btnClose.addEventListener('click', function() {
+        overlay.style.display = 'none';
+    });
+
+    // CHECK STOK SAAT TAMBAH DARI MENU
+    document.querySelectorAll('.form-add-item').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            let stokTersedia = parseInt(this.getAttribute('data-stok')) || 0;
+            let namaProduk = this.getAttribute('data-nama');
+            let inputQty = parseInt(this.querySelector('.input-qty').value) || 0;
+
+            if (inputQty > stokTersedia) {
+                e.preventDefault();
+                tampilkanWarning(namaProduk, stokTersedia, inputQty);
+            }
+        });
+    });
+
+    // CHECK STOK SAAT DIUBAH DI KERANJANG
+    document.querySelectorAll('.form-update-item').forEach(function(form) {
+        let inputQty = form.querySelector('.input-qty-cart');
+        
+        inputQty.addEventListener('change', function() {
+            let stokTersedia = parseInt(form.getAttribute('data-stok')) || 0;
+            let namaProduk = form.getAttribute('data-nama');
+            let valQty = parseInt(this.value) || 0;
+
+            if (valQty > stokTersedia) {
+                tampilkanWarning(namaProduk, stokTersedia, valQty);
+            } else {
+                form.submit();
+            }
+        });
+    });
+
+    // Sembunyikan area pembayaran awal
     cashArea.style.display = 'none';
     qrisArea.style.display = 'none';
 
     metode.addEventListener('change', function(){
-
         if(this.value === 'CASH'){
             cashArea.style.display = 'block';
             qrisArea.style.display = 'none';
@@ -375,20 +542,11 @@ document.addEventListener('DOMContentLoaded', function(){
             bayar.value = '';
             kembali.value = '';
         }
-
+        hitungKembalian();
     });
 
-    bayar.addEventListener('input', function(){
-
-        let uang = parseInt(this.value) || 0;
-        let hasil = uang - total;
-
-        kembali.value =
-            hasil >= 0
-            ? 'Rp ' + hasil.toLocaleString('id-ID')
-            : 'Uang Kurang';
-
-    });
+    // Jalankan kalkulasi pertama kali saat halaman dimuat
+    hitungTotal();
 
 });
 </script>
