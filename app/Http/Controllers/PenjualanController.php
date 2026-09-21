@@ -20,17 +20,14 @@ class PenjualanController extends Controller
         $keyword = $request->input('search');
 
         $sales = Penjualan::query()
-
-            ->when($user->role->name === 'kasir', function ($query) use ($user) {
+            ->when($user->role && $user->role->name === 'kasir', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             })
-
             ->when($keyword, function ($query) use ($keyword) {
                 $query->whereHas('user', function ($q) use ($keyword) {
                     $q->where('name', 'like', '%' . $keyword . '%');
                 });
             })
-
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -54,17 +51,16 @@ class PenjualanController extends Controller
             ]
         );
 
+        // PENTING: Load relasi itemPenjualan agar keranjang terisi di view
+        $sale->load('itemPenjualan.produk');
+
         $keyword = $request->input('search');
 
-        if ($keyword) {
-            $products = Produk::when($keyword, function ($query) use ($keyword) {
+        $products = Produk::when($keyword, function ($query) use ($keyword) {
                 $query->where('nama', 'like', '%' . $keyword . '%');
             })
             ->orderBy('nama')
             ->get();
-        } else {
-            $products = Produk::orderBy('nama')->get();
-        }
 
         $mode = 'create';
 
@@ -86,7 +82,7 @@ class PenjualanController extends Controller
     {
         $sale = $penjualan;
 
-        $sale->load('itemPenjualan');
+        $sale->load('itemPenjualan.produk');
         $products = Produk::orderBy('nama')->get();
         $mode = 'view';
 
@@ -102,7 +98,7 @@ class PenjualanController extends Controller
 
         abort_if($sale->status === 'COMPLETED', 403);
 
-        $sale->load('itemPenjualan');
+        $sale->load('itemPenjualan.produk');
         $products = Produk::orderBy('nama')->get();
         $mode = 'edit';
 
@@ -116,18 +112,18 @@ class PenjualanController extends Controller
     {
         $request->validate([
             'payment_method' => 'required|in:CASH,QRIS',
+            'uang_bayar'     => 'required_if:payment_method,CASH|nullable|numeric',
         ]);
 
         if ($penjualan->status !== 'OPEN') {
-            return back()->with('errors', 'Transaksi sudah diproses');
+            return back()->withErrors(['message' => 'Transaksi sudah diproses']);
         }
 
         if ($penjualan->itemPenjualan()->count() === 0) {
-            return back()->with('errors', 'Keranjang masih kosong');
+            return back()->withErrors(['message' => 'Keranjang masih kosong']);
         }
 
         try {
-
             DB::transaction(function () use ($penjualan, $request) {
 
                 $total = $penjualan->itemPenjualan()->sum('subtotal');
@@ -136,11 +132,10 @@ class PenjualanController extends Controller
                 $kembalian = null;
 
                 if ($request->payment_method === 'CASH') {
-
                     $uangBayar = (int) $request->uang_bayar;
 
                     if ($uangBayar < $total) {
-                        throw new \Exception('Uang pembayaran kurang');
+                        throw new \Exception('Uang pembayaran kurang!');
                     }
 
                     $kembalian = $uangBayar - $total;
@@ -156,8 +151,7 @@ class PenjualanController extends Controller
             });
 
         } catch (\Exception $e) {
-
-            return back()->with('errors', $e->getMessage());
+            return back()->withErrors(['message' => $e->getMessage()]);
         }
 
         return redirect()
@@ -175,7 +169,7 @@ class PenjualanController extends Controller
         if ($penjualan->status !== 'OPEN') {
             return redirect()
                 ->route('penjualan.create')
-                ->with('errors', 'Transaksi sudah selesai tidak bisa dibatalkan');
+                ->withErrors(['message' => 'Transaksi sudah selesai tidak bisa dibatalkan']);
         }
 
         if ($penjualan->user_id !== Auth::id()) {
@@ -183,13 +177,13 @@ class PenjualanController extends Controller
         }
 
         DB::transaction(function () use ($penjualan) {
-
             foreach ($penjualan->itemPenjualan as $item) {
-                $item->produk->increment('stok', $item->kuantitas);
+                if ($item->produk) {
+                    $item->produk->increment('stok', $item->kuantitas);
+                }
             }
 
             $penjualan->itemPenjualan()->delete();
-
             $penjualan->delete();
         });
 

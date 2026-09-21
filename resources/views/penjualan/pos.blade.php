@@ -163,7 +163,8 @@ body {
 }
 </style>
 
-@if ($errors->any())
+{{-- PENANGANAN ERROR DAN ALERT DENGAN PENGECEKAN TIPE DATA --}}
+@if (isset($errors) && is_object($errors) && method_exists($errors, 'any') && $errors->any())
 <div class="alert alert-danger rounded-4">
     <strong>⚠️ Terjadi Kesalahan:</strong>
     <ul class="mb-0">
@@ -171,6 +172,16 @@ body {
         <li>{{ $error }}</li>
         @endforeach
     </ul>
+</div>
+@elseif (session('error_message'))
+<div class="alert alert-danger rounded-4">
+    <strong>⚠️ Terjadi Kesalahan:</strong> {{ session('error_message') }}
+</div>
+@endif
+
+@if(session('success'))
+<div class="alert alert-success rounded-4">
+    ☕ {{ session('success') }}
 </div>
 @endif
 
@@ -287,7 +298,7 @@ body {
                     @csrf
                     @method('PUT')
 
-                    <select name="payment_method" id="payment_method" class="form-select mb-3">
+                    <select name="payment_method" id="payment_method" class="form-select mb-3" required>
                         <option value="">Pilih Pembayaran</option>
                         <option value="CASH">Cash</option>
                         <option value="QRIS">QRIS</option>
@@ -350,14 +361,17 @@ document.addEventListener('DOMContentLoaded', function(){
         if(this.value === 'CASH'){
             cashArea.style.display = 'block';
             qrisArea.style.display = 'none';
+            bayar.setAttribute('required', 'required');
         } else if(this.value === 'QRIS'){
             cashArea.style.display = 'none';
             qrisArea.style.display = 'block';
+            bayar.removeAttribute('required');
             bayar.value = '';
             kembali.value = '';
         } else {
             cashArea.style.display = 'none';
             qrisArea.style.display = 'none';
+            bayar.removeAttribute('required');
             bayar.value = '';
             kembali.value = '';
         }

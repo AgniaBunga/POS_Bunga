@@ -545,7 +545,8 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
                 $groupKey = match (true) {
                     is_bool($groupKey) => (int) $groupKey,
                     $groupKey instanceof \UnitEnum => enum_value($groupKey),
-                    $groupKey instanceof \Stringable, is_null($groupKey) => (string) $groupKey,
+                    $groupKey instanceof \Stringable => (string) $groupKey,
+                    is_null($groupKey) => (string) $groupKey,
                     default => $groupKey,
                 };
 
@@ -729,25 +730,41 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
      *
      * @param  (callable(TValue, TKey): bool)|null  $callback
      * @return bool
-     *
-     * @deprecated 12.49.0 Use the `hasSole()` method instead.
      */
     public function containsOneItem(?callable $callback = null): bool
     {
-        return $this->hasSole($callback);
+        if ($callback) {
+            return $this->filter($callback)->count() === 1;
+        }
+
+        return $this->count() === 1;
     }
 
     /**
-     * Determine if the collection contains multiple items.
+     * Determine if the collection contains multiple items. If a callback is provided, determine if multiple items match the condition.
      *
      * @param  (callable(TValue, TKey): bool)|null  $callback
      * @return bool
-     *
-     * @deprecated 12.50.0 Use the `hasMany()` method instead.
      */
     public function containsManyItems(?callable $callback = null): bool
     {
-        return $this->hasMany($callback);
+        if (! $callback) {
+            return $this->count() > 1;
+        }
+
+        $count = 0;
+
+        foreach ($this as $key => $item) {
+            if ($callback($item, $key)) {
+                $count++;
+            }
+
+            if ($count > 1) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -880,10 +897,8 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
     /**
      * Merge the collection with the given items.
      *
-     * @template TMergeValue
-     *
-     * @param  \Illuminate\Contracts\Support\Arrayable<TKey, TMergeValue>|iterable<TKey, TMergeValue>  $items
-     * @return static<TKey, TValue|TMergeValue>
+     * @param  \Illuminate\Contracts\Support\Arrayable<TKey, TValue>|iterable<TKey, TValue>  $items
+     * @return static
      */
     public function merge($items)
     {
@@ -949,7 +964,7 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
      *
      * @param  int  $step
      * @param  int  $offset
-     * @return ($step is positive-int ? static : never)
+     * @return static
      *
      * @throws \InvalidArgumentException
      */
@@ -1373,7 +1388,7 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
      * Split a collection into a certain number of groups.
      *
      * @param  int  $numberOfGroups
-     * @return ($numberOfGroups is positive-int ? static<int, static> : never)
+     * @return static<int, static>
      *
      * @throws \InvalidArgumentException
      */
@@ -1416,7 +1431,7 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
      * Split a collection into a certain number of groups, and fill the first groups completely.
      *
      * @param  int  $numberOfGroups
-     * @return ($numberOfGroups is positive-int ? static<int, static> : never)
+     * @return static<int, static>
      *
      * @throws \InvalidArgumentException
      */
@@ -1459,26 +1474,6 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
         }
 
         return $items->first();
-    }
-
-    /**
-     * Determine if the collection contains a single item, optionally matching the given criteria.
-     *
-     * @param  (callable(TValue, TKey): bool)|string|null  $key
-     * @param  mixed  $operator
-     * @param  mixed  $value
-     * @return bool
-     */
-    public function hasSole($key = null, $operator = null, $value = null): bool
-    {
-        $filter = func_num_args() > 1
-            ? $this->operatorForWhere(...func_get_args())
-            : $key;
-
-        return $this
-            ->unless($filter == null)
-            ->filter($filter)
-            ->count() === 1;
     }
 
     /**
@@ -1808,12 +1803,11 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
     /**
      * Flatten a multi-dimensional associative array with dots.
      *
-     * @param  int  $depth
      * @return static
      */
-    public function dot($depth = INF)
+    public function dot()
     {
-        return new static(Arr::dot($this->all(), '', $depth));
+        return new static(Arr::dot($this->all()));
     }
 
     /**

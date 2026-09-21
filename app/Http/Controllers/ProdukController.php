@@ -21,20 +21,29 @@ class ProdukController extends Controller
 
         $keyword = $request->input('search');
 
+        // Mengambil query dasar dan menambahkan agregasi sum 'kuantitas' dari transaksi status COMPLETED
+        $query = Produk::withSum(['itemPenjualan as terjual' => function ($q) {
+            $q->whereHas('penjualan', function ($p) {
+                $p->where('status', 'COMPLETED');
+            });
+        }], 'kuantitas');
+
         if ($keyword) {
-            $products = Produk::when($keyword, function ($query) use ($keyword) {
-                $query->where('nama', 'like', '%' . $keyword . '%');
-            })
-            ->orderBy('nama')
-            ->paginate(10)
-            ->withQueryString();
+            $products = $query->where('nama', 'like', '%' . $keyword . '%')
+                ->orderBy('nama')
+                ->paginate(10)
+                ->withQueryString();
         } else {
-            $products = Produk::latest()
+            $products = $query->latest()
                 ->paginate(10)
                 ->withQueryString();
         }
 
-        return view('produk.index', compact('products'));
+        // Hitung nilai terjual tertinggi dari halaman produk yang ditampilkan
+        $maxTerjual = $products->max('terjual') ?? 0;
+
+        // Kirim $maxTerjual ke view
+        return view('produk.index', compact('products', 'maxTerjual'));
     }
 
     /**
@@ -124,7 +133,7 @@ class ProdukController extends Controller
         $produk->update($data);
 
         return redirect()
-            ->route('produk.edit', $produk->id)
+            ->route('produk.index')
             ->with('success', 'Product updated successfully.');
     }
 
